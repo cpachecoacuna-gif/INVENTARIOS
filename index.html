@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Inventario ACHS Laja — Mayo 2026</title>
+<style>
+  :root {
+    --bg: #f4f4f0;
+    --surface: #ffffff;
+    --border: #e0ddd8;
+    --text: #1a1a18;
+    --text-muted: #7a7870;
+    --accent: #1a1a18;
+    --ok: #1a6641;
+    --ok-bg: #e6f4ed;
+    --warn: #7a4a00;
+    --warn-bg: #fef3e0;
+    --danger: #8b1a1a;
+    --danger-bg: #fdeaea;
+    --critical: #5a0a0a;
+    --critical-bg: #f8d7d7;
+    --pend: #4a4a48;
+    --pend-bg: #ebebeb;
+    --font: 'DM Sans', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* HEADER */
+  .header { background: var(--accent); color: #fff; padding: 16px; position: sticky; top: 0; z-index: 50; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .header h1 { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; }
+  .header p { font-size: 11px; opacity: 0.65; margin-top: 2px; }
+  .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; display: inline-block; margin-right: 4px; animation: pulse 2s infinite; }
+  .sync-dot.off { background: #f87171; animation: none; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .sync-label { font-size: 11px; opacity: 0.8; display: flex; align-items: center; gap: 4px; }
+
+  /* TABS */
+  .tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 72px; z-index: 40; }
+  .tab { flex: 1; padding: 11px 4px; font-size: 12px; font-weight: 500; text-align: center; cursor: pointer; color: var(--text-muted); border: none; background: none; border-bottom: 2px solid transparent; transition: all 0.15s; }
+  .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+
+  /* SEARCH + EXPORT */
+  .toolbar { padding: 10px 12px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; gap: 8px; align-items: center; position: sticky; top: 113px; z-index: 39; }
+  .toolbar input { flex: 1; padding: 8px 12px; font-size: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-family: var(--font); }
+  .toolbar input:focus { outline: none; border-color: var(--accent); }
+  .btn-export { padding: 8px 12px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; font-family: var(--font); }
+
+  /* STATS */
+  .stats { display: flex; gap: 8px; padding: 10px 12px; background: var(--bg); border-bottom: 1px solid var(--border); }
+  .stat { flex: 1; background: var(--surface); border-radius: 8px; padding: 8px; text-align: center; border: 1px solid var(--border); }
+  .stat-n { font-size: 18px; font-weight: 700; }
+  .stat-l { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+  .n-ok { color: var(--ok); }
+  .n-diff { color: var(--danger); }
+
+  /* LIST */
+  .list { padding-bottom: 40px; }
+  .section-head { padding: 8px 12px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); background: var(--bg); border-bottom: 1px solid var(--border); }
+  .item { display: flex; align-items: center; gap: 10px; padding: 11px 12px; background: var(--surface); border-bottom: 1px solid var(--border); cursor: pointer; active:background: var(--bg); transition: background 0.1s; }
+  .item:active { background: var(--bg); }
+  .item-left { flex: 1; min-width: 0; }
+  .item-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+  .item-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+  .b-pend { background: var(--pend-bg); color: var(--pend); }
+  .b-ok { background: var(--ok-bg); color: var(--ok); }
+  .b-warn { background: var(--warn-bg); color: var(--warn); }
+  .b-danger { background: var(--danger-bg); color: var(--danger); }
+  .b-critical { background: var(--critical-bg); color: var(--critical); font-size: 12px; }
+
+  /* DIFF TABLE */
+  .diff-row { display: flex; align-items: stretch; border-bottom: 1px solid var(--border); }
+  .diff-sev { width: 6px; flex-shrink: 0; }
+  .diff-sev.c1 { background: #fbbf24; }
+  .diff-sev.c2 { background: #f97316; }
+  .diff-sev.c3 { background: #ef4444; }
+  .diff-sev.c4 { background: #7f1d1d; }
+  .diff-content { flex: 1; padding: 10px 12px; background: var(--surface); display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .diff-badge { font-size: 13px; font-weight: 800; padding: 4px 10px; border-radius: 6px; flex-shrink: 0; }
+
+  /* MODAL */
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: flex-end; }
+  .modal-bg.open { display: flex; }
+  .modal { background: var(--surface); border-radius: 20px 20px 0 0; padding: 0 0 40px; width: 100%; max-height: 92vh; overflow-y: auto; }
+  .modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto 16px; }
+  .modal-head { padding: 0 16px 16px; border-bottom: 1px solid var(--border); }
+  .modal-title { font-size: 15px; font-weight: 600; line-height: 1.3; margin-bottom: 4px; }
+  .modal-code { font-size: 11px; color: var(--text-muted); }
+  .modal-body { padding: 16px; }
+  .field-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 6px; }
+  .ref-box { background: var(--bg); border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; font-size: 22px; font-weight: 700; color: var(--text); }
+  .ref-box span { font-size: 12px; font-weight: 400; color: var(--text-muted); margin-left: 6px; }
+
+  /* COUNT ROW */
+  .count-row { display: flex; align-items: center; gap: 0; margin-bottom: 16px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .count-btn { width: 52px; height: 52px; font-size: 24px; font-weight: 300; border: none; background: var(--bg); cursor: pointer; color: var(--text); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .count-btn:active { background: var(--border); }
+  .count-val { flex: 1; text-align: center; font-size: 30px; font-weight: 700; color: var(--text); border-left: 1px solid var(--border); border-right: 1px solid var(--border); padding: 8px 0; }
+
+  /* INPUTS */
+  .field-input { width: 100%; padding: 10px 12px; font-size: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-family: var(--font); margin-bottom: 14px; }
+  .field-input:focus { outline: none; border-color: var(--accent); }
+  textarea.field-input { min-height: 64px; resize: none; }
+  .btn-save { width: 100%; padding: 14px; background: var(--accent); color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: var(--font); margin-top: 4px; }
+  .btn-save:active { opacity: 0.85; }
+
+  /* EMPTY */
+  .empty { padding: 40px; text-align: center; color: var(--text-muted); font-size: 14px; }
+
+  /* LEGEND */
+  .legend { display: flex; gap: 8px; padding: 10px 12px; flex-wrap: wrap; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>Inventario ACHS Laja — Mayo 2026</h1>
+      <p>Cristóbal &amp; Nicole · Stock físico real</p>
+    </div>
+    <div class="sync-label">
+      <span class="sync-dot" id="sync-dot"></span>
+      <span id="sync-label">Conectando...</span>
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('med')">Medicamentos</button>
+  <button class="tab" onclick="switchTab('ins')">Insumos</button>
+  <button class="tab" onclick="switchTab('dif')">Diferencias</button>
+</div>
+
+<div class="toolbar">
+  <input type="search" id="search" placeholder="Buscar nombre o código..." oninput="renderList()">
+  <button class="btn-export" onclick="exportExcel()">⬇ Excel</button>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-n" id="s-total">—</div><div class="stat-l">Total</div></div>
+  <div class="stat"><div class="stat-n n-ok" id="s-ok">—</div><div class="stat-l">Contados</div></div>
+  <div class="stat"><div class="stat-n n-diff" id="s-diff">—</div><div class="stat-l">Diferencias</div></div>
+</div>
+
+<div id="legend" class="legend" style="display:none!important">
+  <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>Leve (1–5)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div>Moderado (6–15)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Alto (&gt;15)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#7f1d1d"></div>Crítico (&gt;50)</div>
+</div>
+
+<div class="list" id="list"></div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-head">
+      <div class="modal-title" id="m-name"></div>
+      <div class="modal-code" id="m-code"></div>
+    </div>
+    <div class="modal-body">
+      <div class="field-label">Stock sistema SAP (referencia)</div>
+      <div class="ref-box" id="m-ref">— <span>unidades</span></div>
+
+      <div class="field-label">Conteo físico real</div>
+      <div class="count-row">
+        <button class="count-btn" onclick="chg(-10)">−−</button>
+        <button class="count-btn" onclick="chg(-1)">−</button>
+        <div class="count-val" id="m-count">0</div>
+        <button class="count-btn" onclick="chg(1)">+</button>
+        <button class="count-btn" onclick="chg(10)">++</button>
+      </div>
+
+      <div class="field-label">Número de lote / serie</div>
+      <input type="text" class="field-input" id="m-lote" placeholder="Ej: 75UA0002">
+
+      <div class="field-label">Fecha de vencimiento</div>
+      <input type="text" class="field-input" id="m-venc" placeholder="Ej: 31.12.2026">
+
+      <div class="field-label">Observación</div>
+      <textarea class="field-input" id="m-obs" placeholder="Vencido, faltante, cambio de lote..."></textarea>
+
+      <button class="btn-save" onclick="saveItem()">Guardar conteo</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const FIREBASE_URL = "https://inventarios-18aac-default-rtdb.firebaseio.com/mayo2026";
+
+const MED = [
+  {id:"261240",n:"ACIDO ACETILSALICILICO 100 MG",sap:10,t:"Medicamento"},
+  {id:"253366",n:"ACIDO VALPROICO 200 MG",sap:30,t:"Medicamento"},
+  {id:"250049",n:"AEROGASTROL CAPSULA",sap:40,t:"Medicamento"},
+  {id:"260014",n:"AKAN 10MG B.E.",sap:30,t:"Medicamento"},
+  {id:"250880",n:"ALCOHOL PAD 70%",sap:295,t:"Medicamento"},
+  {id:"260449",n:"AMATO 25 MG B.E. EUROFARMA",sap:120,t:"Medicamento"},
+  {id:"250099",n:"AMIODARONA 150 MG/3 ML",sap:2,t:"Medicamento"},
+  {id:"250109",n:"AMOVAL 500MG B.E.",sap:42,t:"Medicamento"},
+  {id:"259835",n:"ARIZOL 10MG B.E.",sap:112,t:"Medicamento"},
+  {id:"250147",n:"ASPIRINA 100 MG",sap:182,t:"Medicamento"},
+  {id:"250146",n:"ASPIRINA 500 MG",sap:60,t:"Medicamento"},
+  {id:"250164",n:"ATROPINA 1 MG/1 ML",sap:2,t:"Medicamento"},
+  {id:"250169",n:"AURITUSS 250/25/120 DOSIS",sap:1,t:"Medicamento"},
+  {id:"250207",n:"BERODUAL HFA 200 DOSIS",sap:1,t:"Medicamento"},
+  {id:"260297",n:"BETAMETASONA 0,05%/15 GR",sap:3,t:"Medicamento"},
+  {id:"259787",n:"BETAMETASONA 4 MG/1ML",sap:57,t:"Medicamento"},
+  {id:"260136",n:"BETINA 16MG B.E. EUROFARMA",sap:20,t:"Medicamento"},
+  {id:"252018",n:"BICARBONATO DE SODIO 8,4%/10ML",sap:5,t:"Medicamento"},
+  {id:"256898",n:"BUDESYNT HFA-LA 200MCG",sap:1,t:"Medicamento"},
+  {id:"250272",n:"BUXON 150 MG",sap:60,t:"Medicamento"},
+  {id:"250283",n:"CAPTOPRIL 25MG MINTLAB",sap:40,t:"Medicamento"},
+  {id:"255502",n:"CARBAMAZEPINA 200 MG",sap:40,t:"Medicamento"},
+  {id:"250305",n:"CEFADROXILO 500 MG",sap:190,t:"Medicamento"},
+  {id:"256654",n:"CEFAZOLINA 1 GR DIFEM",sap:9,t:"Medicamento"},
+  {id:"261576",n:"CELECOXIB 200MG B.E. ASCEND",sap:810,t:"Medicamento"},
+  {id:"255986",n:"CICLOBENZAPRINA 10 MG",sap:60,t:"Medicamento"},
+  {id:"250351",n:"CIPRODEX 5 ML",sap:1,t:"Medicamento"},
+  {id:"260485",n:"CIRIAX 500MG B.E. MEGALABS",sap:100,t:"Medicamento"},
+  {id:"260075",n:"CLAVAM DUO 875MG/125MG",sap:100,t:"Medicamento"},
+  {id:"250373",n:"CLEXANE 40 MG/0,4 ML",sap:10,t:"Medicamento"},
+  {id:"255934",n:"CLONEX CD 0,5 MG SAVAL",sap:30,t:"Medicamento"},
+  {id:"252884",n:"CLONIXINATO LISINA 100 MG/2 ML",sap:19,t:"Medicamento"},
+  {id:"250394",n:"CLORFENAMINA 10 MG/ML",sap:56,t:"Medicamento"},
+  {id:"250393",n:"CLORFENAMINA 4 MG MINTLAB",sap:89,t:"Medicamento"},
+  {id:"259807",n:"CLORHEXIDINA GLUC. 0,12%/150ML",sap:1,t:"Medicamento"},
+  {id:"250422",n:"CLORURO SODIO 0,9%/20ML AMP",sap:100,t:"Medicamento"},
+  {id:"250414",n:"CLORURO SODIO 0,9% 100ML BOLSA",sap:4,t:"Medicamento"},
+  {id:"250413",n:"CLORURO SODIO 0,9% 250ML BOLSA",sap:10,t:"Medicamento"},
+  {id:"250431",n:"CLORURO SODIO 0,9% 500ML BOLSA",sap:5,t:"Medicamento"},
+  {id:"250449",n:"CLOXACILINA 500MG OPKO",sap:78,t:"Medicamento"},
+  {id:"258937",n:"CREVET LIGHT 500 MG MASTICABLE",sap:32,t:"Medicamento"},
+  {id:"250496",n:"DACAM RL 3ML",sap:5,t:"Medicamento"},
+  {id:"250535",n:"DIAZEPAM 10 MG/2 ML",sap:1,t:"Medicamento"},
+  {id:"260395",n:"DICLOFENACO GEL 1,16%/30GR",sap:6,t:"Medicamento"},
+  {id:"255341",n:"DICLOFENACO SODICO 50 MG",sap:120,t:"Medicamento"},
+  {id:"250546",n:"DICLOFENACO SODICO 75 MG/3 ML",sap:7,t:"Medicamento"},
+  {id:"252886",n:"DICLOFENACO SODICO 75 MG/3 ML BIOS",sap:93,t:"Medicamento"},
+  {id:"250582",n:"DORMONID 15 MG/3 ML",sap:5,t:"Medicamento"},
+  {id:"261254",n:"EPINEFRINA 1 MG/ML BLAU",sap:3,t:"Medicamento"},
+  {id:"261855",n:"ESC 10 MG B.E. EUROFARMA",sap:270,t:"Medicamento"},
+  {id:"250131",n:"EUCERIN AQUAPHOR",sap:4,t:"Medicamento"},
+  {id:"250690",n:"EUROGREL 75 MG",sap:35,t:"Medicamento"},
+  {id:"250707",n:"FAMOTIDINA 20 MG",sap:40,t:"Medicamento"},
+  {id:"250713",n:"FASARAX 20 MG",sap:40,t:"Medicamento"},
+  {id:"250727",n:"FIBRASOL 5GR",sap:18,t:"Medicamento"},
+  {id:"250748",n:"FLUCLOXACILINA 500 MG",sap:36,t:"Medicamento"},
+  {id:"252027",n:"FLUMAZENIL 0.5 MG/5 ML",sap:5,t:"Medicamento"},
+  {id:"250761",n:"FLUOXETINA 20MG B.E.",sap:80,t:"Medicamento"},
+  {id:"250764",n:"FLUXUS 10 MG",sap:60,t:"Medicamento"},
+  {id:"250765",n:"FOLIFER 330 MG",sap:30,t:"Medicamento"},
+  {id:"259763",n:"FUROSEMIDA 20MG/2ML",sap:2,t:"Medicamento"},
+  {id:"250835",n:"GLUCOSA 30%/500ML MATRAZ",sap:1,t:"Medicamento"},
+  {id:"250843",n:"GLUCOSALINO 500ML BOLSA",sap:1,t:"Medicamento"},
+  {id:"250860",n:"HALOPERIDOL 5MG/ML",sap:2,t:"Medicamento"},
+  {id:"253115",n:"HIDROCORTISONA 100 MG VITALIS",sap:9,t:"Medicamento"},
+  {id:"252728",n:"IBUPROFENO 400MG OPKO",sap:226,t:"Medicamento"},
+  {id:"255686",n:"INFOR PRO 3",sap:30,t:"Medicamento"},
+  {id:"253849",n:"ISENTRESS 400MG",sap:60,t:"Medicamento"},
+  {id:"254602",n:"KETOPROFENO 50 MG MINTLAB",sap:109,t:"Medicamento"},
+  {id:"259830",n:"KETOPROFENO IV 100MG/2ML",sap:184,t:"Medicamento"},
+  {id:"254948",n:"KETOROLACO 10 MG MINTLAB",sap:90,t:"Medicamento"},
+  {id:"250955",n:"KETOROLACO 30 MG/ML BIOSANO",sap:44,t:"Medicamento"},
+  {id:"258271",n:"LAGRIMAS ARTIFICIALES OPKO 15ML",sap:7,t:"Medicamento"},
+  {id:"251002",n:"LIDOCAINA 2%/5ML SANDERSON",sap:25,t:"Medicamento"},
+  {id:"251022",n:"LOPERAMIDA 2 MG MINTLAB",sap:30,t:"Medicamento"},
+  {id:"261284",n:"LORATADINA 10 MG LAB. CHILE",sap:30,t:"Medicamento"},
+  {id:"251826",n:"LORATADINA 10 MG OPKO",sap:50,t:"Medicamento"},
+  {id:"251037",n:"LUBRIDERM LOCION 400ML",sap:3,t:"Medicamento"},
+  {id:"251046",n:"MACROSAN 100 MG",sap:30,t:"Medicamento"},
+  {id:"251067",n:"MELOXICAM 15 MG",sap:70,t:"Medicamento"},
+  {id:"251074",n:"METAMIZOL 1 GR/2 ML",sap:86,t:"Medicamento"},
+  {id:"251078",n:"METOCLOPRAMIDA 10 MG MINTLAB",sap:72,t:"Medicamento"},
+  {id:"258398",n:"MIDATUS 20MG/10ML",sap:2,t:"Medicamento"},
+  {id:"251108",n:"MORFINA 10 MG/ML",sap:1,t:"Medicamento"},
+  {id:"256924",n:"MUXOL 30 MG/5 ML/100ML",sap:1,t:"Medicamento"},
+  {id:"251144",n:"NEOLUCID PH5 250 ML",sap:4,t:"Medicamento"},
+  {id:"251147",n:"NEOSTIGMINA 0,5 MG/ML",sap:2,t:"Medicamento"},
+  {id:"261784",n:"OLANZAPINA 5MG MOMENTA",sap:30,t:"Medicamento"},
+  {id:"251229",n:"OMEPRAZOL 20 MG OPKO",sap:200,t:"Medicamento"},
+  {id:"261561",n:"ONDANSETRON 4 MG/2 ML VITAFARMA",sap:4,t:"Medicamento"},
+  {id:"251232",n:"ONDANSETRON 4 MG/2 ML SANDERSON",sap:23,t:"Medicamento"},
+  {id:"251252",n:"PARACETAMOL 10MG/ML/100ML",sap:1,t:"Medicamento"},
+  {id:"251253",n:"PARACETAMOL 500 MG ANDROMACO",sap:1550,t:"Medicamento"},
+  {id:"261777",n:"PISDENO 6 MG/2 ML",sap:12,t:"Medicamento"},
+  {id:"251301",n:"PRADAXA 110 MG",sap:60,t:"Medicamento"},
+  {id:"251307",n:"PREGALEX 75 MG B.E.",sap:30,t:"Medicamento"},
+  {id:"251317",n:"PRISTIQ 50 MG",sap:28,t:"Medicamento"},
+  {id:"254524",n:"PROPRANOLOL 10 MG MINTLAB",sap:180,t:"Medicamento"},
+  {id:"253004",n:"QURAX 25MG B.E.",sap:470,t:"Medicamento"},
+  {id:"254814",n:"RISPERIDONA 1 MG ANDROMACO",sap:500,t:"Medicamento"},
+  {id:"251398",n:"RITMENAL 400MG B.E.",sap:30,t:"Medicamento"},
+  {id:"259819",n:"RIVOXA 10MG B.E.",sap:30,t:"Medicamento"},
+  {id:"253194",n:"SALBUTAMOL 100 MCG/200 DOSIS",sap:9,t:"Medicamento"},
+  {id:"260784",n:"SALBUTAMOL 5MG/ML/20ML LAFEDAR",sap:1,t:"Medicamento"},
+  {id:"254936",n:"SERTAC 50MG B.E.",sap:240,t:"Medicamento"},
+  {id:"252577",n:"SULFA-G 30 GR",sap:3,t:"Medicamento"},
+  {id:"251487",n:"SULFATO DE MAGNESIO 25% 5ML",sap:2,t:"Medicamento"},
+  {id:"254963",n:"SUXAMETONIO CLORURO 100 MG",sap:2,t:"Medicamento"},
+  {id:"255804",n:"TENARTA EM ETC 200MG/TDF 300MG",sap:30,t:"Medicamento"},
+  {id:"251564",n:"TOL 12 FORTE 10000 UI/3ML",sap:3,t:"Medicamento"},
+  {id:"251584",n:"TRADOX 100 MG",sap:30,t:"Medicamento"},
+  {id:"252565",n:"TRAMADOL 100MG/ML/10ML ORAL",sap:1,t:"Medicamento"},
+  {id:"251590",n:"TRAMAL LONG 50 MG",sap:40,t:"Medicamento"},
+  {id:"251596",n:"TRAVIATA 20 MG",sap:150,t:"Medicamento"},
+  {id:"251599",n:"TREX 500MG B.E.",sap:30,t:"Medicamento"},
+  {id:"251609",n:"TRITTICO 100 MG",sap:60,t:"Medicamento"},
+  {id:"261667",n:"TRIXO-LIND 500 ML",sap:12,t:"Medicamento"},
+  {id:"251621",n:"UNDERAN 2%/15 GR",sap:1,t:"Medicamento"},
+  {id:"251658",n:"VASELINA LIQUIDA ESTERIL 5ML",sap:1,t:"Medicamento"},
+  {id:"251674",n:"VERTIUM 25 MG",sap:40,t:"Medicamento"},
+  {id:"260448",n:"VITAMINA C 1000MG HOSPIFARMA",sap:200,t:"Medicamento"},
+  {id:"260914",n:"VITAMINA C 1000MG SPRINGLIFE",sap:40,t:"Medicamento"},
+  {id:"251708",n:"XOLOF 0,3%/5 ML",sap:4,t:"Medicamento"},
+  {id:"251719",n:"ZOMETIC 7,5 MG",sap:145,t:"Medicamento"},
+];
+
+const INS = [
+  {id:"100685",n:"CABLE ELECTRODO TENS 3000",sap:2,t:"Insumo"},
+  {id:"102667",n:"PILA AUDIFONO CODIGO 312",sap:138,t:"Insumo"},
+  {id:"150006",n:"GEL PACK FRIO/CALOR",sap:5,t:"Insumo"},
+  {id:"150009",n:"BOTA INMOVILIZADORA TM",sap:3,t:"Insumo"},
+  {id:"150011",n:"CABESTRILLO P/BRAZO TL",sap:3,t:"Insumo"},
+  {id:"150014",n:"COLLAR CERVICAL BLANDO LARGE",sap:5,t:"Insumo"},
+  {id:"150047",n:"FERULA DIGITAL 1,5 CM",sap:1,t:"Insumo"},
+  {id:"150048",n:"FERULA DIGITAL METALICA 2 CM",sap:2,t:"Insumo"},
+  {id:"150051",n:"INMOVILIZADOR HOMBRO M",sap:5,t:"Insumo"},
+  {id:"150053",n:"INMOVILIZADOR MUÑEC FERULA T M",sap:2,t:"Insumo"},
+  {id:"150054",n:"INMOV. MUÑEC FERULA T L",sap:2,t:"Insumo"},
+  {id:"150055",n:"INMOVILIZADOR RODILLA UNIVERSAL",sap:2,t:"Insumo"},
+  {id:"150062",n:"RODILLERA C/BARRAS LATERALES M",sap:1,t:"Insumo"},
+  {id:"150074",n:"TELA VENDAJE NEUROMUSCULAR AZUL",sap:2,t:"Insumo"},
+  {id:"150075",n:"TELA VENDAJE NEUROMUSCULAR BEIGE",sap:9,t:"Insumo"},
+  {id:"150076",n:"TELA VENDAJE NEUROMUSCULAR NEG",sap:9,t:"Insumo"},
+  {id:"150077",n:"TELA VENDAJE NEUROMUSCULAR ROJO",sap:2,t:"Insumo"},
+  {id:"150080",n:"TOBILLERA ESTABILI. C/BARRA T L",sap:4,t:"Insumo"},
+  {id:"150106",n:"ZAPATO POST OPERATORIO TALLA L",sap:2,t:"Insumo"},
+  {id:"150240",n:"BASTON CANADIENSE CODERA FIJA",sap:1,t:"Insumo"},
+  {id:"187506",n:"ZAPATO POST OPERATORIO TALLA S",sap:2,t:"Insumo"},
+  {id:"200028",n:"TUBO T OXIGENOTERAPIA",sap:3,t:"Insumo"},
+  {id:"200031",n:"AEROCAMARA FASIDOSE INHALACION",sap:3,t:"Insumo"},
+  {id:"200035",n:"AGUJA DESECH 18 GX 1 1/2",sap:95,t:"Insumo"},
+  {id:"200038",n:"AGUJA DESECH 21 Gx1",sap:30,t:"Insumo"},
+  {id:"200039",n:"AGUJA DESECH 21 Gx1 1/2",sap:81,t:"Insumo"},
+  {id:"200041",n:"AGUJA DESECH 25 GX1",sap:101,t:"Insumo"},
+  {id:"200050",n:"ALARGADOR DE OXIGENO 2 MT",sap:11,t:"Insumo"},
+  {id:"200054",n:"ALARGADOR VENOSO C/LLAVE 3 PASOS",sap:8,t:"Insumo"},
+  {id:"200057",n:"ALGINATO CALCIO 10X10CM",sap:13,t:"Insumo"},
+  {id:"200060",n:"ALGODON PRENSADO 1000 GR",sap:2,t:"Insumo"},
+  {id:"200064",n:"APOSITO 48X35CM ESTERIL",sap:10,t:"Insumo"},
+  {id:"200065",n:"APOSITO ALGINATO CON PLATA 10x10",sap:1,t:"Insumo"},
+  {id:"200071",n:"APOSITO CHICO 10X20CM ESTERIL",sap:30,t:"Insumo"},
+  {id:"200073",n:"TULL CON PLATA 10X10 CM",sap:5,t:"Insumo"},
+  {id:"200077",n:"APOSITO TRANSPARENTE 10X25CM",sap:41,t:"Insumo"},
+  {id:"200079",n:"APOSITO TRANSPARENTE 5X7CM",sap:33,t:"Insumo"},
+  {id:"200084",n:"APOSITO VIA VENOSA 7X6,5CM",sap:49,t:"Insumo"},
+  {id:"200096",n:"BAJADA CORRIENTE EV C/LUER LOCK",sap:33,t:"Insumo"},
+  {id:"200105",n:"BISTURI DESECH C/MANGO N11",sap:28,t:"Insumo"},
+  {id:"200106",n:"BISTURI DESECH C/MANGO N15",sap:25,t:"Insumo"},
+  {id:"200153",n:"CANULA ASPIRACION YANKAHUER MED.",sap:1,t:"Insumo"},
+  {id:"200156",n:"CANULA MAYO N5/11CM",sap:2,t:"Insumo"},
+  {id:"200181",n:"CATETER AUTOGUARD 16 GX30MM",sap:8,t:"Insumo"},
+  {id:"200182",n:"CATETER AUTOGUARD 18G X 30MM",sap:9,t:"Insumo"},
+  {id:"200183",n:"CATETER AUTOGUARD 20 GX30MM",sap:41,t:"Insumo"},
+  {id:"200184",n:"CATETER AUTOGUARD 22 GX25MM",sap:11,t:"Insumo"},
+  {id:"200192",n:"CATGUT SIMPLE 3/0 AGUJA G322",sap:6,t:"Insumo"},
+  {id:"200197",n:"CHATA DESECH",sap:10,t:"Insumo"},
+  {id:"200223",n:"CONDUCTOR TUBO ENDOTRAQUEAL 14FR",sap:1,t:"Insumo"},
+  {id:"200239",n:"CONTENEDOR AMARILLO 4,8 LT",sap:8,t:"Insumo"},
+  {id:"200274",n:"ELECTRODO ECG REPO KIT X10",sap:70,t:"Insumo"},
+  {id:"200286",n:"ESPUMA HIDROFILICA 10X10CM",sap:1,t:"Insumo"},
+  {id:"200295",n:"ETHILON 5/0 P698",sap:3,t:"Insumo"},
+  {id:"200307",n:"FILTRO HIGROSCOPICO BACTERIANO",sap:1,t:"Insumo"},
+  {id:"200315",n:"FRASCO MUESTRA ORINA 100 ML",sap:25,t:"Insumo"},
+  {id:"200325",n:"GASA C/CLORHEXIDINA 5X5CM",sap:63,t:"Insumo"},
+  {id:"200326",n:"GASA CURACION 7,5X7,5CM ESTERIL",sap:258,t:"Insumo"},
+  {id:"200350",n:"GUANTE QUIR. LATEX N 7",sap:14,t:"Insumo"},
+  {id:"200351",n:"GUANTE QUIR. LATEX N 7,5",sap:8,t:"Insumo"},
+  {id:"200352",n:"GUANTE QUIR. LATEX N 8",sap:10,t:"Insumo"},
+  {id:"200364",n:"HISOPO P/PINCELAR 3X15CM",sap:86,t:"Insumo"},
+  {id:"200386",n:"JABON NEUTRO BALSAM. 950ML",sap:14,t:"Insumo"},
+  {id:"200391",n:"JERINGA 20ML C/AGUJA LUERLOCK",sap:50,t:"Insumo"},
+  {id:"200392",n:"JERINGA 10ML AGUJA 21 GX11/2",sap:52,t:"Insumo"},
+  {id:"200393",n:"JERINGA 3ML AG 21GX1 1/2",sap:42,t:"Insumo"},
+  {id:"200395",n:"JERINGA 5ML AGUJA 21 GX11/2",sap:52,t:"Insumo"},
+  {id:"200422",n:"LLAVE 3 PASOS DESECH MONOCANAL",sap:43,t:"Insumo"},
+  {id:"200433",n:"MARIPOSA 19 GX3/4",sap:2,t:"Insumo"},
+  {id:"200436",n:"MARIPOSA 23 GX3/4",sap:22,t:"Insumo"},
+  {id:"200445",n:"MASCARILLA OXIGENOTERAPIA 100%",sap:5,t:"Insumo"},
+  {id:"200446",n:"MASCARILLA DESECH 3 PLIEGES x50",sap:6,t:"Insumo"},
+  {id:"200447",n:"MASCARILLA NEBULIZ C/TUBO",sap:3,t:"Insumo"},
+  {id:"200448",n:"MASCARILLA OXIGENOTERAPIA MULTIVENT",sap:10,t:"Insumo"},
+  {id:"200464",n:"ETHILON 2/0 AGUJA 3/8 164T",sap:8,t:"Insumo"},
+  {id:"200465",n:"ETHILON 3/0 AGUJA 3/8 P1663T",sap:13,t:"Insumo"},
+  {id:"200466",n:"MONOSOF 4-0 AGUJ 3/8 SN-5667",sap:7,t:"Insumo"},
+  {id:"200468",n:"PAÑAL DESECH P/ADULTO",sap:36,t:"Insumo"},
+  {id:"200484",n:"PAPEL FLUORESCEINA",sap:11,t:"Insumo"},
+  {id:"200514",n:"PARCHE GEL CONDUCTOR DESFIBRILACION",sap:2,t:"Insumo"},
+  {id:"200516",n:"PATO URINARIO DESECH",sap:11,t:"Insumo"},
+  {id:"200563",n:"PROTECTOR CUTANEO NO IRRITAN",sap:46,t:"Insumo"},
+  {id:"200573",n:"RIÑON DESECHABLE ESTERIL",sap:9,t:"Insumo"},
+  {id:"200575",n:"SABANILLA CLINICA 48MT DESECH",sap:10,t:"Insumo"},
+  {id:"200577",n:"SACA CORCHETE PIEL",sap:5,t:"Insumo"},
+  {id:"200587",n:"PARCHE OCULAR 82X57 MM",sap:11,t:"Insumo"},
+  {id:"200592",n:"ALCOHOL GEL BOLSA 950 ML",sap:5,t:"Insumo"},
+  {id:"200649",n:"SUTURA ADHESIVA 1/4X4 6X100MM",sap:5,t:"Insumo"},
+  {id:"200655",n:"TAPA OBTURACION C/GOMA AMARILLA",sap:8,t:"Insumo"},
+  {id:"200664",n:"TRANSPORTE WHITE CINTA 2.5CMx9MT",sap:26,t:"Insumo"},
+  {id:"200667",n:"TELA ADHESIVA TRANSPARENTE 2.5CM",sap:12,t:"Insumo"},
+  {id:"200676",n:"TEST EMBARAZO INDIVIDUAL ORINA",sap:3,t:"Insumo"},
+  {id:"200729",n:"TUBO ENDOTRAQUEAL N7 C/BALON",sap:1,t:"Insumo"},
+  {id:"200730",n:"TUBO ENDOTRAQUEAL N7,5 C/BALON",sap:1,t:"Insumo"},
+  {id:"200731",n:"TUBO ENDOTRAQUEAL N8 C/BALON",sap:2,t:"Insumo"},
+  {id:"200732",n:"TUBO ENDOTRAQUEAL N8,5 C/BALON",sap:2,t:"Insumo"},
+  {id:"200733",n:"TUBO ENDOTRAQUEAL N9 C/BALON",sap:2,t:"Insumo"},
+  {id:"200748",n:"TUBULAR 10CMX25MT",sap:1,t:"Insumo"},
+  {id:"200753",n:"TUBULAR ELASTICADO F/G 10-12CM",sap:3,t:"Insumo"},
+  {id:"200758",n:"TULL C/VASELINA 7.6X7.6 CM",sap:18,t:"Insumo"},
+  {id:"200760",n:"GASA PARAFINADA 10X10CM",sap:27,t:"Insumo"},
+  {id:"200764",n:"VENDA FIJACION ADHESIVA 10CMX10MT",sap:2,t:"Insumo"},
+  {id:"200765",n:"VENDA FIJACION ADHESIVA 15CMX10MT",sap:1,t:"Insumo"},
+  {id:"200769",n:"VENDA FIJACION STRECH 10C",sap:2,t:"Insumo"},
+  {id:"200774",n:"VENDA ELASTICADA ALG 4CMX4MT",sap:44,t:"Insumo"},
+  {id:"200775",n:"VENDA ELASTICADA ALG 8-10CM",sap:107,t:"Insumo"},
+  {id:"200788",n:"POLYSORB GL-123",sap:3,t:"Insumo"},
+  {id:"200789",n:"VICRYL 3/0 J123",sap:6,t:"Insumo"},
+];
+
+const ALL = [...MED, ...INS];
+let counts = {};
+let tab = 'med';
+let activeItem = null;
+let fbConnected = false;
+
+// ─── FIREBASE SYNC ───────────────────────────────────────────────────────────
+function fbUrl(path){ return FIREBASE_URL + '/' + path + '.json'; }
+
+async function fbGet(){
+  try {
+    const r = await fetch(FIREBASE_URL + '.json');
+    const d = await r.json();
+    counts = d || {};
+    setSync(true);
+    renderList();
+  } catch(e){ setSync(false); }
+}
+
+async function fbSet(id, val){
+  try {
+    await fetch(fbUrl(id), { method:'PUT', body: JSON.stringify(val) });
+    setSync(true);
+  } catch(e){ setSync(false); }
+}
+
+function setSync(ok){
+  fbConnected = ok;
+  document.getElementById('sync-dot').className = 'sync-dot' + (ok?'':' off');
+  document.getElementById('sync-label').textContent = ok ? 'Sincronizado' : 'Sin conexión';
+}
+
+// Poll each 4 seconds for real-time feel
+setInterval(fbGet, 4000);
+fbGet();
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function getDiff(item){
+  const c = counts[item.id];
+  if(!c && c !== 0) return null;
+  return (c.count !== undefined ? c.count : null);
+}
+
+function severity(diff){
+  const a = Math.abs(diff);
+  if(a === 0) return 0;
+  if(a <= 5) return 1;
+  if(a <= 15) return 2;
+  if(a <= 50) return 3;
+  return 4;
+}
+
+function sevClass(s){ return ['','c1','c2','c3','c4'][s]; }
+function sevBadge(s){ return ['b-ok','b-warn','b-warn','b-danger','b-critical'][s]; }
+function sevLabel(s){ return ['OK','Leve','Moderado','Alto ⚠','Crítico 🚨'][s]; }
+
+function getBadge(item){
+  const c = counts[item.id];
+  if(!c) return {cls:'b-pend', txt:'Pendiente'};
+  const d = c.count - item.sap;
+  if(d === 0) return {cls:'b-ok', txt:'OK ✓'};
+  const s = severity(d);
+  const sign = d > 0 ? '+' : '';
+  return {cls: sevBadge(s), txt: sign + d + ' · ' + sevLabel(s)};
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+function renderList(){
+  const q = document.getElementById('search').value.toLowerCase();
+  let items;
+
+  if(tab === 'dif'){
+    document.getElementById('legend').style.removeProperty('display');
+    items = ALL.filter(i => counts[i.id] && counts[i.id].count !== i.sap);
+    items.sort((a,b) => Math.abs(counts[b.id].count - b.sap) - Math.abs(counts[a.id].count - a.sap));
+  } else {
+    document.getElementById('legend').style.setProperty('display','none','important');
+    items = tab === 'med' ? MED : INS;
+  }
+
+  if(q) items = items.filter(i => i.n.toLowerCase().includes(q) || i.id.includes(q));
+
+  document.getElementById('s-total').textContent = items.length;
+  document.getElementById('s-ok').textContent = items.filter(i => counts[i.id] !== undefined).length;
+  document.getElementById('s-diff').textContent = items.filter(i => counts[i.id] && counts[i.id].count !== i.sap).length;
+
+  if(tab === 'dif' && items.length === 0){
+    document.getElementById('list').innerHTML = '<div class="empty">Sin diferencias registradas aún.<br>Vuelve aquí mientras avanza el conteo.</div>';
+    return;
+  }
+
+  if(tab === 'dif'){
+    document.getElementById('list').innerHTML = items.map(item => {
+      const c = counts[item.id];
+      const d = c.count - item.sap;
+      const s = severity(d);
+      const sign = d > 0 ? '+' : '';
+      const diffColor = ['#16a34a','#d97706','#ea580c','#dc2626','#7f1d1d'][s];
+      return `<div class="diff-row">
+        <div class="diff-sev ${sevClass(s)}"></div>
+        <div class="diff-content">
+          <div class="item-left">
+            <div class="item-name">${item.n}</div>
+            <div class="item-sub">SAP: ${item.sap} · Real: ${c.count} · ${item.t}${c.lote?' · Lote: '+c.lote:''}</div>
+            ${c.obs?`<div class="item-sub" style="color:#666;margin-top:2px">${c.obs}</div>`:''}
+          </div>
+          <div class="diff-badge" style="background:${diffColor}22;color:${diffColor}">${sign}${d}</div>
+        </div>
+      </div>`;
+    }).join('');
+    return;
+  }
+
+  document.getElementById('list').innerHTML = items.map(item => {
+    const b = getBadge(item);
+    const c = counts[item.id];
+    const sub = `Código: ${item.id} · SAP: ${item.sap}${c&&c.lote?' · L:'+c.lote:''}`;
+    return `<div class="item" onclick="openModal('${item.id}')">
+      <div class="item-left">
+        <div class="item-name">${item.n}</div>
+        <div class="item-sub">${sub}</div>
+      </div>
+      <span class="badge ${b.cls}">${b.txt}</span>
+    </div>`;
+  }).join('') || '<div class="empty">Sin resultados</div>';
+}
+
+function switchTab(t){
+  tab = t;
+  document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active',['med','ins','dif'][i]===t));
+  document.getElementById('search').value = '';
+  renderList();
+}
+
+// ─── MODAL ───────────────────────────────────────────────────────────────────
+function openModal(id){
+  const item = ALL.find(i => i.id === id);
+  if(!item) return;
+  activeItem = item;
+  const c = counts[id];
+  document.getElementById('m-name').textContent = item.n;
+  document.getElementById('m-code').textContent = `Código: ${id} · ${item.t}`;
+  document.getElementById('m-ref').innerHTML = `${item.sap} <span>unidades en SAP</span>`;
+  document.getElementById('m-count').textContent = c !== undefined ? c.count : item.sap;
+  document.getElementById('m-lote').value = c && c.lote ? c.lote : '';
+  document.getElementById('m-venc').value = c && c.venc ? c.venc : '';
+  document.getElementById('m-obs').value = c && c.obs ? c.obs : '';
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal(){
+  document.getElementById('modal').classList.remove('open');
+  activeItem = null;
+}
+
+function chg(d){
+  const el = document.getElementById('m-count');
+  el.textContent = Math.max(0, parseInt(el.textContent || 0) + d);
+}
+
+async function saveItem(){
+  if(!activeItem) return;
+  const val = {
+    count: parseInt(document.getElementById('m-count').textContent),
+    lote: document.getElementById('m-lote').value.trim(),
+    venc: document.getElementById('m-venc').value.trim(),
+    obs: document.getElementById('m-obs').value.trim(),
+    ts: new Date().toISOString()
+  };
+  counts[activeItem.id] = val;
+  closeModal();
+  renderList();
+  await fbSet(activeItem.id, val);
+}
+
+document.getElementById('modal').addEventListener('click', e => { if(e.target === document.getElementById('modal')) closeModal(); });
+
+// ─── EXPORT ──────────────────────────────────────────────────────────────────
+function exportExcel(){
+  const toRows = items => items.map(item => {
+    const c = counts[item.id];
+    const contado = c !== undefined ? c.count : '';
+    const diff = c !== undefined ? c.count - item.sap : '';
+    const s = c !== undefined && diff !== '' ? severity(diff) : '';
+    return {
+      'Código': item.id,
+      'Descripción': item.n,
+      'Tipo': item.t,
+      'Stock SAP': item.sap,
+      'Conteo real': contado,
+      'Diferencia': diff,
+      'Criticidad': s !== '' ? sevLabel(s) : '',
+      'Lote/Serie': c && c.lote ? c.lote : '',
+      'Vencimiento': c && c.venc ? c.venc : '',
+      'Observación': c && c.obs ? c.obs : '',
+      'Estado': c === undefined ? 'Pendiente' : diff === 0 ? 'OK' : diff > 0 ? 'Sobrante' : 'Faltante'
+    };
+  });
+
+  const wb = XLSX.utils.book_new();
+  const cols = [{wch:10},{wch:42},{wch:12},{wch:12},{wch:12},{wch:12},{wch:12},{wch:18},{wch:14},{wch:30},{wch:10}];
+
+  const wsMed = XLSX.utils.json_to_sheet(toRows(MED));
+  wsMed['!cols'] = cols;
+  XLSX.utils.book_append_sheet(wb, wsMed, 'Medicamentos');
+
+  const wsIns = XLSX.utils.json_to_sheet(toRows(INS));
+  wsIns['!cols'] = cols;
+  XLSX.utils.book_append_sheet(wb, wsIns, 'Insumos');
+
+  const diffs = ALL.filter(i => counts[i.id] && counts[i.id].count !== i.sap);
+  diffs.sort((a,b) => Math.abs(counts[b.id].count-b.sap) - Math.abs(counts[a.id].count-a.sap));
+  const wsDif = XLSX.utils.json_to_sheet(toRows(diffs));
+  wsDif['!cols'] = cols;
+  XLSX.utils.book_append_sheet(wb, wsDif, 'Solo diferencias');
+
+  XLSX.writeFile(wb, 'Inventario_ACHS_Laja_Mayo_2026.xlsx');
+}
+</script>
+</body>
+</html>
