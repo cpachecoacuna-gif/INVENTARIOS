@@ -127,7 +127,7 @@ textarea.finput{min-height:60px;resize:none}
       <div class="count-row">
         <button class="cbtn" onclick="chg(-10)">−10</button>
         <button class="cbtn" onclick="chg(-1)">−1</button>
-        <input type="number" class="cval" id="mcnt" min="0" inputmode="tel" style="border:none;outline:none;background:transparent;width:100%;text-align:center;" value="0">
+        <input type="text" class="cval" id="mcnt" inputmode="tel" pattern="[0-9]*" oninput="this.value=this.value.replace(/[^0-9]/g,'')" style="border:none;outline:none;background:transparent;width:100%;text-align:center;" value="0">
         <button class="cbtn" onclick="chg(1)">+1</button>
         <button class="cbtn" onclick="chg(10)">+10</button>
       </div>
@@ -424,23 +424,46 @@ const ALL = [...MED,...INS];
 let counts = {}, tab = 'med', active = null;
 
 // ── FIREBASE ──────────────────────────────────────────────
+let localOnly = {}; // items saved locally, waiting firebase confirm
+
 async function fbFetch(){
   try{
     const r = await fetch(FB+'.json');
+    if(!r.ok) throw new Error('HTTP '+r.status);
     const d = await r.json();
-    counts = d||{};
+    if(d && typeof d === 'object'){
+      // Merge: firebase wins except for locally-pending saves
+      Object.keys(d).forEach(k=>{ if(!localOnly[k]) counts[k]=d[k]; });
+      // Add any keys not in local counts
+    }
     setSync(true); render();
-  }catch(e){setSync(false);}
+  }catch(e){ setSync(false); }
 }
-async function fbSave(id,val){
-  try{await fetch(FB+'/'+id+'.json',{method:'PUT',body:JSON.stringify(val)});setSync(true);}
-  catch(e){setSync(false);}
+
+async function fbSave(id, val){
+  localOnly[id] = true;
+  counts[id] = val;
+  try{
+    const r = await fetch(FB+'/'+id+'.json',{
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(val)
+    });
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    setSync(true);
+  }catch(e){
+    setSync(false);
+    // Keep local data, retry on next poll
+  } finally {
+    delete localOnly[id];
+  }
 }
+
 function setSync(ok){
   document.getElementById('dot').className='dot'+(ok?'':' off');
   document.getElementById('synctxt').textContent=ok?'Sincronizado':'Sin conexión';
 }
-setInterval(fbFetch,4000); fbFetch();
+setInterval(fbFetch, 5000); fbFetch();
 
 // ── HELPERS ───────────────────────────────────────────────
 function sev(d){const a=Math.abs(d);if(a===0)return 0;if(a<=5)return 1;if(a<=15)return 2;if(a<=50)return 3;return 4;}
@@ -537,9 +560,8 @@ function closeModal(){document.getElementById('modal').classList.remove('open');
 function chg(d){const el=document.getElementById('mcnt');el.value=Math.max(0,parseInt(el.value||0)+d);}
 async function save(){
   if(!active)return;
-  const val={count:parseInt(document.getElementById("mcnt").value),lote:document.getElementById('mlote').value.trim(),venc:document.getElementById('mvenc').value.trim(),obs:document.getElementById('mobs').value.trim(),ts:new Date().toISOString()};
-  counts[active.id]=val;closeModal();render();
-  await fbSave(active.id,val);
+  const val={count:parseInt(document.getElementById("mcnt").value)||0,lote:document.getElementById('mlote').value.trim(),venc:document.getElementById('mvenc').value.trim(),obs:document.getElementById('mobs').value.trim(),ts:new Date().toISOString()};
+  closeModal(); await fbSave(active.id, val); render();
 }
 document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal();});
 
