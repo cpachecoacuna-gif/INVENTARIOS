@@ -578,8 +578,17 @@ function closeModal(){document.getElementById('modal').classList.remove('open');
 function chg(d){const el=document.getElementById('mcnt');el.value=Math.max(0,parseInt(el.value||0)+d);}
 async function save(){
   if(!active)return;
-  const val={count:parseInt(document.getElementById("mcnt").value)||0,lote:document.getElementById('mlote').value.trim(),venc:document.getElementById('mvenc').value.trim(),obs:document.getElementById('mobs').value.trim(),ts:new Date().toISOString()};
-  closeModal(); render(); await window.fbSave(active.id, val);
+  const itemId = active.id; // capture before closeModal clears active
+  const val={
+    count: parseInt(document.getElementById("mcnt").value)||0,
+    lote: document.getElementById('mlote').value.trim(),
+    venc: document.getElementById('mvenc').value.trim(),
+    obs:  document.getElementById('mobs').value.trim(),
+    ts:   new Date().toISOString()
+  };
+  closeModal();
+  render();
+  await window.fbSave(itemId, val);
 }
 document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal();});
 
