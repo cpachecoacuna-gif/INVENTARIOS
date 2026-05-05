@@ -127,7 +127,7 @@ textarea.finput{min-height:60px;resize:none}
       <div class="count-row">
         <button class="cbtn" onclick="chg(-10)">−10</button>
         <button class="cbtn" onclick="chg(-1)">−1</button>
-        <div class="cval" id="mcnt">0</div>
+        <input type="number" class="cval" id="mcnt" min="0" inputmode="tel" style="border:none;outline:none;background:transparent;width:100%;text-align:center;" value="0">
         <button class="cbtn" onclick="chg(1)">+1</button>
         <button class="cbtn" onclick="chg(10)">+10</button>
       </div>
@@ -526,7 +526,7 @@ function openModal(id){
   document.getElementById('mcode').textContent='Código: '+id+' · '+item.t;
   document.getElementById('mref').textContent=item.sap+' unidades en SAP';
   document.getElementById('mlotes').textContent=item.lotes?'Lotes SAP: '+item.lotes:'';
-  document.getElementById('mcnt').textContent=c?c.count:item.sap;
+  document.getElementById("mcnt").value=c?c.count:item.sap;
   document.getElementById('mlote').value=c&&c.lote?c.lote:(item.lotes&&item.lotes.indexOf('/')<0?item.lotes:'');
   document.getElementById('lotehint').textContent=item.lotes&&item.lotes.indexOf('/')>-1?'Múltiples lotes: '+item.lotes:'';
   document.getElementById('mvenc').value=c&&c.venc?c.venc:'';
@@ -534,10 +534,10 @@ function openModal(id){
   document.getElementById('modal').classList.add('open');
 }
 function closeModal(){document.getElementById('modal').classList.remove('open');active=null;}
-function chg(d){const el=document.getElementById('mcnt');el.textContent=Math.max(0,parseInt(el.textContent||0)+d);}
+function chg(d){const el=document.getElementById('mcnt');el.value=Math.max(0,parseInt(el.value||0)+d);}
 async function save(){
   if(!active)return;
-  const val={count:parseInt(document.getElementById('mcnt').textContent),lote:document.getElementById('mlote').value.trim(),venc:document.getElementById('mvenc').value.trim(),obs:document.getElementById('mobs').value.trim(),ts:new Date().toISOString()};
+  const val={count:parseInt(document.getElementById("mcnt").value),lote:document.getElementById('mlote').value.trim(),venc:document.getElementById('mvenc').value.trim(),obs:document.getElementById('mobs').value.trim(),ts:new Date().toISOString()};
   counts[active.id]=val;closeModal();render();
   await fbSave(active.id,val);
 }
