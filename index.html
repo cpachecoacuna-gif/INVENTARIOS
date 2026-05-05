@@ -4,39 +4,49 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Inventario ACHS Laja — Mayo 2026</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f0efe9;--surface:#fff;--border:#e2e0d8;--text:#181815;--muted:#79776e;--accent:#181815;--ok:#15643c;--ok-bg:#e4f2ea;--leve-bg:#fef9e7;--leve:#7a5c00;--mod-bg:#fef0e0;--mod:#8a4500;--alto-bg:#fde8e8;--alto:#8b1515;--crit-bg:#f5d0d0;--crit:#5a0808;--pend-bg:#ebebeb;--pend:#4a4a48;--font:'DM Sans',system-ui,sans-serif}
+:root{--bg:#f0efe9;--surf:#fff;--bord:#e2e0d8;--txt:#181815;--muted:#79776e;--acc:#181815;
+--ok:#15643c;--ok-bg:#e4f2ea;--leve:#7a5c00;--leve-bg:#fef9e7;
+--mod:#8a4500;--mod-bg:#fef0e0;--alto:#8b1515;--alto-bg:#fde8e8;
+--crit:#5a0808;--crit-bg:#f5d0d0;--pend:#4a4a48;--pend-bg:#ebebeb;
+--font:'DM Sans',system-ui,sans-serif}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh}
-.header{background:var(--accent);color:#fff;padding:14px 16px 10px;position:sticky;top:0;z-index:50}
-.header-row{display:flex;justify-content:space-between;align-items:flex-start}
-.header h1{font-size:15px;font-weight:600;letter-spacing:-.3px}
-.header p{font-size:11px;opacity:.6;margin-top:2px}
-.sync{display:flex;align-items:center;gap:5px;font-size:11px;opacity:.8}
+body{font-family:var(--font);background:var(--bg);color:var(--txt);min-height:100vh}
+/* HEADER */
+.hdr{background:var(--acc);color:#fff;padding:14px 16px 10px;position:sticky;top:0;z-index:50}
+.hdr-row{display:flex;justify-content:space-between;align-items:flex-start}
+.hdr h1{font-size:15px;font-weight:600;letter-spacing:-.3px}
+.hdr p{font-size:11px;opacity:.6;margin-top:2px}
+.sync{display:flex;align-items:center;gap:5px;font-size:11px;opacity:.85}
 .dot{width:7px;height:7px;border-radius:50%;background:#4ade80;flex-shrink:0;animation:pulse 2s infinite}
 .dot.off{background:#f87171;animation:none}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-.tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:68px;z-index:40}
-.tab{flex:1;padding:10px 4px;font-size:12px;font-weight:500;text-align:center;cursor:pointer;color:var(--muted);border:none;background:none;border-bottom:2px solid transparent;transition:all .15s;font-family:var(--font)}
-.tab.active{color:var(--text);border-bottom-color:var(--accent)}
-.toolbar{padding:9px 12px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;position:sticky;top:108px;z-index:39}
-.toolbar input{flex:1;padding:8px 11px;font-size:14px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-family:var(--font)}
-.toolbar input:focus{outline:none;border-color:var(--accent)}
-.btn{padding:8px 12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:var(--font)}
-.stats{display:flex;gap:7px;padding:9px 12px;background:var(--bg);border-bottom:1px solid var(--border)}
-.stat{flex:1;background:var(--surface);border-radius:8px;padding:7px 6px;text-align:center;border:1px solid var(--border)}
-.sn{font-size:17px;font-weight:700}.sl{font-size:10px;color:var(--muted);margin-top:1px}
+/* TABS */
+.tabs{display:flex;background:var(--surf);border-bottom:1px solid var(--bord);position:sticky;top:68px;z-index:40}
+.tab{flex:1;padding:10px 4px;font-size:12px;font-weight:500;text-align:center;cursor:pointer;color:var(--muted);border:none;background:none;border-bottom:2px solid transparent;font-family:var(--font)}
+.tab.on{color:var(--txt);border-bottom-color:var(--acc)}
+/* TOOLBAR */
+.toolbar{padding:9px 12px;background:var(--surf);border-bottom:1px solid var(--bord);display:flex;gap:8px;align-items:center;position:sticky;top:108px;z-index:39}
+.toolbar input{flex:1;padding:8px 11px;font-size:14px;border:1px solid var(--bord);border-radius:8px;background:var(--bg);color:var(--txt);font-family:var(--font)}
+.toolbar input:focus{outline:none;border-color:var(--acc)}
+.xbtn{padding:8px 12px;background:var(--acc);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);white-space:nowrap}
+/* STATS */
+.stats{display:flex;gap:7px;padding:9px 12px;border-bottom:1px solid var(--bord)}
+.stat{flex:1;background:var(--surf);border-radius:8px;padding:7px 6px;text-align:center;border:1px solid var(--bord)}
+.sn{font-size:17px;font-weight:700}
+.sl{font-size:10px;color:var(--muted);margin-top:1px}
 .ok-n{color:var(--ok)}.diff-n{color:var(--alto)}
-.legend{display:flex;flex-wrap:wrap;gap:8px;padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--border)}
+/* LEGEND */
+.legend{display:flex;flex-wrap:wrap;gap:8px;padding:8px 12px;background:var(--surf);border-bottom:1px solid var(--bord)}
 .leg{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted)}
-.legdot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.legdot{width:9px;height:9px;border-radius:2px}
+/* LIST */
 .list{padding-bottom:48px}
-.item{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--surface);border-bottom:1px solid var(--border);cursor:pointer}
+.item{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--surf);border-bottom:1px solid var(--bord);cursor:pointer}
 .item:active{background:var(--bg)}
 .il{flex:1;min-width:0}
-.iname{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.iname{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .isub{font-size:11px;color:var(--muted);margin-top:2px}
 .badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0}
 .b-pend{background:var(--pend-bg);color:var(--pend)}
@@ -45,58 +55,63 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .b-mod{background:var(--mod-bg);color:var(--mod)}
 .b-alto{background:var(--alto-bg);color:var(--alto)}
 .b-crit{background:var(--crit-bg);color:var(--crit)}
-.diff-row{display:flex;align-items:stretch;border-bottom:1px solid var(--border)}
+/* DIFF VIEW */
+.drow{display:flex;align-items:stretch;border-bottom:1px solid var(--bord)}
 .dbar{width:5px;flex-shrink:0}
 .d1{background:#facc15}.d2{background:#f97316}.d3{background:#ef4444}.d4{background:#7f1d1d}
-.dcontent{flex:1;padding:10px 12px;background:var(--surface);display:flex;align-items:center;gap:10px;min-width:0;cursor:pointer}
+.dcont{flex:1;padding:10px 12px;background:var(--surf);display:flex;align-items:center;gap:10px;min-width:0;cursor:pointer}
 .dbadge{font-size:14px;font-weight:800;padding:4px 10px;border-radius:6px;flex-shrink:0}
 .empty{padding:36px;text-align:center;color:var(--muted);font-size:14px;line-height:1.6}
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end}
-.modal-bg.open{display:flex}
-.modal{background:var(--surface);border-radius:18px 18px 0 0;padding:0 0 36px;width:100%;max-height:92vh;overflow-y:auto}
-.mhandle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 14px}
-.mhead{padding:0 16px 14px;border-bottom:1px solid var(--border)}
+/* MODAL */
+.mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end}
+.mbg.open{display:flex}
+.modal{background:var(--surf);border-radius:18px 18px 0 0;padding:0 0 36px;width:100%;max-height:92vh;overflow-y:auto}
+.mhandle{width:36px;height:4px;background:var(--bord);border-radius:2px;margin:12px auto 14px}
+.mhead{padding:0 16px 14px;border-bottom:1px solid var(--bord)}
 .mtitle{font-size:15px;font-weight:600;line-height:1.3;margin-bottom:3px}
 .mcode{font-size:11px;color:var(--muted)}
 .mbody{padding:14px 16px}
 .flabel{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:5px}
 .refbox{background:var(--bg);border-radius:8px;padding:10px 12px;margin-bottom:14px}
-.refbig{font-size:22px;font-weight:700;color:var(--text)}
+.refbig{font-size:22px;font-weight:700}
 .refsub{font-size:11px;color:var(--muted);margin-top:2px}
-.count-row{display:flex;align-items:center;margin-bottom:14px;border:1px solid var(--border);border-radius:11px;overflow:hidden}
-.cbtn{flex:1;height:50px;font-size:20px;font-weight:300;border:none;background:var(--bg);cursor:pointer;color:var(--text);font-family:var(--font);border-right:1px solid var(--border)}
-.cbtn:last-child{border-right:none;border-left:1px solid var(--border)}
-.cval{flex:2;text-align:center;font-size:28px;font-weight:700;color:var(--text);padding:8px 0}
-.finput{width:100%;padding:10px 11px;font-size:14px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-family:var(--font);margin-bottom:12px}
-.finput:focus{outline:none;border-color:var(--accent)}
+/* COUNT */
+.crow{display:flex;align-items:center;margin-bottom:14px;border:1px solid var(--bord);border-radius:11px;overflow:hidden}
+.cbtn{flex:1;height:50px;font-size:18px;border:none;background:var(--bg);cursor:pointer;color:var(--txt);font-family:var(--font);border-right:1px solid var(--bord)}
+.cbtn:last-child{border-right:none;border-left:1px solid var(--bord)}
+#mcnt{flex:2;text-align:center;font-size:28px;font-weight:700;padding:8px 0;border:none;background:var(--surf);color:var(--txt);font-family:var(--font);width:100%}
+#mcnt:focus{outline:none}
+/* INPUTS */
+.finput{width:100%;padding:10px 11px;font-size:14px;border:1px solid var(--bord);border-radius:8px;background:var(--bg);color:var(--txt);font-family:var(--font);margin-bottom:12px}
+.finput:focus{outline:none;border-color:var(--acc)}
 textarea.finput{min-height:60px;resize:none}
-.savelote{font-size:11px;color:var(--muted);margin:-8px 0 12px;padding:0 2px}
-.btnsave{width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:11px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font)}
-.btnsave:active{opacity:.85}
+.hint{font-size:11px;color:var(--muted);margin:-8px 0 12px;padding:0 2px}
+.savebtn{width:100%;padding:13px;background:var(--acc);color:#fff;border:none;border-radius:11px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font)}
+.savebtn:active{opacity:.85}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="header-row">
+<div class="hdr">
+  <div class="hdr-row">
     <div><h1>Inventario ACHS Laja — Mayo 2026</h1><p>Cristóbal &amp; Nicole · Stock físico vs SAP</p></div>
-    <div class="sync"><span class="dot" id="dot"></span><span id="synctxt">Conectando...</span></div>
+    <div class="sync"><span class="dot" id="dot"></span><span id="stxt">Conectando...</span></div>
   </div>
 </div>
 
 <div class="tabs">
-  <button class="tab active" onclick="sw('med')">Medicamentos</button>
-  <button class="tab" onclick="sw('ins')">Insumos</button>
-  <button class="tab" onclick="sw('dif')">Diferencias</button>
+  <button class="tab on"  onclick="swTab('med')">Medicamentos</button>
+  <button class="tab"     onclick="swTab('ins')">Insumos</button>
+  <button class="tab"     onclick="swTab('dif')">Diferencias</button>
 </div>
 
 <div class="toolbar">
-  <input type="search" id="search" placeholder="Buscar nombre o código..." oninput="render()">
-  <button class="btn" onclick="exportXLS()">⬇ Excel</button>
+  <input type="search" id="search" placeholder="Buscar nombre o código..." oninput="renderList()">
+  <button class="xbtn" onclick="exportXLS()">⬇ Excel</button>
 </div>
 
 <div class="stats">
-  <div class="stat"><div class="sn" id="st">—</div><div class="sl">Total</div></div>
+  <div class="stat"><div class="sn"      id="st">—</div><div class="sl">Total</div></div>
   <div class="stat"><div class="sn ok-n" id="sok">—</div><div class="sl">Contados</div></div>
   <div class="stat"><div class="sn diff-n" id="sdif">—</div><div class="sl">Diferencias</div></div>
 </div>
@@ -110,12 +125,13 @@ textarea.finput{min-height:60px;resize:none}
 
 <div class="list" id="list"></div>
 
-<div class="modal-bg" id="modal">
+<!-- MODAL -->
+<div class="mbg" id="mbg" onclick="bgClick(event)">
   <div class="modal">
     <div class="mhandle"></div>
     <div class="mhead">
-      <div class="mtitle" id="mtitle"></div>
-      <div class="mcode" id="mcode"></div>
+      <div class="mtitle" id="mtitle">—</div>
+      <div class="mcode"  id="mcode">—</div>
     </div>
     <div class="mbody">
       <div class="flabel">Stock sistema SAP</div>
@@ -123,69 +139,70 @@ textarea.finput{min-height:60px;resize:none}
         <div class="refbig" id="mref">—</div>
         <div class="refsub" id="mlotes"></div>
       </div>
+
       <div class="flabel">Conteo físico real</div>
-      <div class="count-row">
+      <div class="crow">
         <button class="cbtn" onclick="chg(-10)">−10</button>
         <button class="cbtn" onclick="chg(-1)">−1</button>
-        <input type="text" class="cval" id="mcnt" inputmode="tel" pattern="[0-9]*" oninput="this.value=this.value.replace(/[^0-9]/g,'')" style="border:none;outline:none;background:transparent;width:100%;text-align:center;" value="0">
+        <input type="text" id="mcnt" inputmode="tel" pattern="[0-9]*"
+               oninput="this.value=this.value.replace(/[^0-9]/g,'')" value="0">
         <button class="cbtn" onclick="chg(1)">+1</button>
         <button class="cbtn" onclick="chg(10)">+10</button>
       </div>
+
       <div class="flabel">Número de lote / serie</div>
       <input type="text" class="finput" id="mlote" placeholder="Ej: 75UA0002">
-      <p class="savelote" id="lotehint"></p>
+      <div class="hint" id="lhint"></div>
+
       <div class="flabel">Fecha de vencimiento</div>
       <input type="text" class="finput" id="mvenc" placeholder="Ej: 31.12.2026">
+
       <div class="flabel">Observación</div>
       <textarea class="finput" id="mobs" placeholder="Vencido, faltante, cambio de lote..."></textarea>
-      <button class="btnsave" onclick="save()">Guardar conteo</button>
+
+      <button class="savebtn" onclick="saveItem()">Guardar conteo</button>
     </div>
   </div>
 </div>
 
+<!-- XLSX -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- FIREBASE SDK (module) -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { initializeApp }                    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, onValue }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-const firebaseConfig = {
-  databaseURL: "https://inventarios-18aac-default-rtdb.firebaseio.com"
-};
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const dbRef = ref(db, 'mayo2026');
+const app = initializeApp({ databaseURL: "https://inventarios-18aac-default-rtdb.firebaseio.com" });
+const db  = getDatabase(app);
+const ROOT = "mayo2026";
 
-// Listen for changes in real time
-onValue(dbRef, (snapshot) => {
-  const data = snapshot.val();
-  if(data && typeof data === 'object'){
-    Object.keys(data).forEach(k => {
-      if(!window.localOnly[k]) window.counts[k] = data[k];
-    });
-  }
-  setSync(true);
-  render();
-}, (error) => {
-  setSync(false);
-});
+// Listen – merge remote into local, skip items being saved right now
+onValue(ref(db, ROOT), snap => {
+  const remote = snap.val() || {};
+  Object.keys(remote).forEach(k => {
+    if (!window._saving[k]) window.counts[k] = remote[k];
+  });
+  setSyncUI(true);
+  renderList();
+}, () => setSyncUI(false));
 
-// Expose save function globally
-window.fbSave = async function(id, val) {
-  window.localOnly[id] = true;
-  window.counts[id] = val;
-  try {
-    await set(ref(db, 'mayo2026/' + id), val);
-    setSync(true);
-  } catch(e) {
-    console.error('Firebase write error:', e);
-    setSync(false);
-  } finally {
-    delete window.localOnly[id];
-  }
+// Write one item
+window._fbWrite = async function(id, val) {
+  await set(ref(db, ROOT + "/" + id), val);
 };
 </script>
-<script>
 
+<!-- MAIN APP -->
+<script>
+// ── globals ──────────────────────────────────────────────
+window.counts  = {};   // { [id]: {count,lote,venc,obs,ts} }
+window._saving = {};   // ids currently being written to Firebase
+
+var tab    = "med";
+var _openId = null;    // id of item currently open in modal
+
+// ── data ─────────────────────────────────────────────────
 const MED = [
   {id:"250033",n:"ATEMPERATOR 500 MG CMR",sap:0,lotes:"",t:"Medicamento"},
   {id:"250049",n:"AEROGASTROL CAPSULA",sap:40,lotes:"104225",t:"Medicamento"},
@@ -317,8 +334,7 @@ const MED = [
   {id:"261667",n:"TRIXO-LIND 500 ML",sap:12,lotes:"3015COD",t:"Medicamento"},
   {id:"261777",n:"PISDENO 6 MG/2 ML",sap:12,lotes:"C25F121",t:"Medicamento"},
   {id:"261784",n:"OLANZAPINA 5MG MOMENTA B.E.",sap:30,lotes:"959242-2",t:"Medicamento"},
-  {id:"261855",n:"ESC 10 MG B.E. EUROFARMA",sap:270,lotes:"997819-1",t:"Medicamento"}
-];
+  {id:"261855",n:"ESC 10 MG B.E. EUROFARMA",sap:270,lotes:"997819-1",t:"Medicamento"}];
 const INS = [
   {id:"100685",n:"CABLE ELECTRODO TENS 3000 N103A PAR",sap:2,lotes:"",t:"Insumo"},
   {id:"102667",n:"PILA AUDIFONO CODIGO 312",sap:138,lotes:"",t:"Insumo"},
@@ -458,158 +474,217 @@ const INS = [
   {id:"210572",n:"APOSITO ANTIMICROBIANO 10X10CM CON DAC",sap:5,lotes:"",t:"Insumo"},
   {id:"212112",n:"APOSITO DACC MALLA 4x6 CM",sap:53,lotes:"",t:"Insumo"},
   {id:"212333",n:"FRAZADA DESECHABLE SMS",sap:10,lotes:"",t:"Insumo"},
-  {id:"213692",n:"SELLO BLANCO CARRO PARO MINI SLIM",sap:25,lotes:"",t:"Insumo"}
-];
-const ALL = [...MED,...INS];
-window.counts = {}; let counts = window.counts;
-window.localOnly = {};
-let tab = 'med', active = null;
+  {id:"213692",n:"SELLO BLANCO CARRO PARO MINI SLIM",sap:25,lotes:"",t:"Insumo"}];
+const ALL = [...MED, ...INS];
 
-// ── FIREBASE ──────────────────────────────────────────────
-// Firebase SDK loaded via module script above
-window.localOnly = window.localOnly || {};
-
-function setSync(ok){
-  document.getElementById('dot').className='dot'+(ok?'':' off');
-  document.getElementById('synctxt').textContent=ok?'Sincronizado':'Sin conexión';
+// ── sync UI ───────────────────────────────────────────────
+function setSyncUI(ok) {
+  document.getElementById("dot").className  = "dot" + (ok ? "" : " off");
+  document.getElementById("stxt").textContent = ok ? "Sincronizado" : "Sin conexión";
 }
 
-// fbSave is set by the module script above
-// Fallback in case module hasn't loaded yet
-if(!window.fbSave){
-  window.fbSave = async function(id, val){
-    window.counts[id] = val;
-    console.warn('Firebase SDK not ready yet');
-  };
+// ── severity ──────────────────────────────────────────────
+function sev(d) {
+  var a = Math.abs(d);
+  if (a === 0)  return 0;
+  if (a <= 5)   return 1;
+  if (a <= 15)  return 2;
+  if (a <= 50)  return 3;
+  return 4;
+}
+var SEV_CLS = ["b-ok","b-leve","b-mod","b-alto","b-crit"];
+var SEV_LBL = ["OK ✓","Leve","Moderado","Alto ⚠","Crítico 🚨"];
+var BAR_CLS = ["","d1","d2","d3","d4"];
+var BAR_COL = ["#16a34a","#ca8a04","#ea580c","#dc2626","#7f1d1d"];
+
+function getBadge(item) {
+  var c = window.counts[item.id];
+  if (!c) return { cls: "b-pend", txt: "Pendiente" };
+  var d = c.count - item.sap;
+  var s = sev(d);
+  return { cls: SEV_CLS[s], txt: (d > 0 ? "+" : "") + d + (s ? " · " + SEV_LBL[s] : "") };
 }
 
-// ── HELPERS ───────────────────────────────────────────────
-function sev(d){const a=Math.abs(d);if(a===0)return 0;if(a<=5)return 1;if(a<=15)return 2;if(a<=50)return 3;return 4;}
-const SEV_CLS=['b-ok','b-leve','b-mod','b-alto','b-crit'];
-const SEV_LBL=['OK ✓','Leve','Moderado','Alto ⚠','Crítico 🚨'];
-const BAR_CLS=['','d1','d2','d3','d4'];
-const BAR_COL=['#16a34a','#ca8a04','#ea580c','#dc2626','#7f1d1d'];
-
-function badge(item){
-  const c=counts[item.id];
-  if(!c)return{cls:'b-pend',txt:'Pendiente'};
-  const d=c.count-item.sap;
-  const s=sev(d);
-  return{cls:SEV_CLS[s],txt:(d>0?'+':'')+d+(s?' · '+SEV_LBL[s]:'')};
+// ── tab switch ────────────────────────────────────────────
+function swTab(t) {
+  tab = t;
+  document.querySelectorAll(".tab").forEach(function(el, i) {
+    el.classList.toggle("on", ["med","ins","dif"][i] === t);
+  });
+  document.getElementById("search").value = "";
+  renderList();
 }
 
-// ── RENDER ────────────────────────────────────────────────
-function render(){
-  const q=document.getElementById('search').value.toLowerCase();
-  let items;
-  const leg=document.getElementById('legend');
+// ── render ────────────────────────────────────────────────
+function renderList() {
+  var q = document.getElementById("search").value.toLowerCase();
+  var items;
+  var leg = document.getElementById("legend");
 
-  if(tab==='dif'){
-    leg.style.display='flex';
-    items=ALL.filter(i=>counts[i.id]&&counts[i.id].count!==i.sap);
-    items.sort((a,b)=>Math.abs(counts[b.id].count-b.sap)-Math.abs(counts[a.id].count-a.sap));
-  }else{
-    leg.style.display='none';
-    items=tab==='med'?MED:INS;
+  if (tab === "dif") {
+    leg.style.display = "flex";
+    items = ALL.filter(function(i) {
+      return window.counts[i.id] && window.counts[i.id].count !== i.sap;
+    });
+    items.sort(function(a, b) {
+      return Math.abs(window.counts[b.id].count - b.sap) - Math.abs(window.counts[a.id].count - a.sap);
+    });
+  } else {
+    leg.style.display = "none";
+    items = tab === "med" ? MED : INS;
   }
-  if(q)items=items.filter(i=>i.n.toLowerCase().includes(q)||i.id.includes(q));
 
-  document.getElementById('st').textContent=items.length;
-  document.getElementById('sok').textContent=items.filter(i=>counts[i.id]).length;
-  document.getElementById('sdif').textContent=items.filter(i=>counts[i.id]&&counts[i.id].count!==i.sap).length;
+  if (q) items = items.filter(function(i) {
+    return i.n.toLowerCase().includes(q) || i.id.includes(q);
+  });
 
-  if(tab==='dif'){
-    if(!items.length){document.getElementById('list').innerHTML='<div class="empty">Sin diferencias aún.<br>Aparecerán aquí en tiempo real.</div>';return;}
-    document.getElementById('list').innerHTML=items.map(item=>{
-      const c=counts[item.id];const d=c.count-item.sap;const s=sev(d);
-      const col=BAR_COL[s];const sign=d>0?'+':'';
-      return`<div class="diff-row">
-        <div class="dbar ${BAR_CLS[s]}"></div>
-        <div class="dcontent" onclick="openModal('${item.id}')">
-          <div class="il">
-            <div class="iname">${item.n}</div>
-            <div class="isub">SAP: ${item.sap} · Real: ${c.count} · ${item.t}${c.lote?' · L:'+c.lote:''}</div>
-            ${c.obs?'<div class="isub" style="color:#888;margin-top:1px">'+c.obs+'</div>':''}
-          </div>
-          <div class="dbadge" style="background:${col}22;color:${col}">${sign}${d}</div>
-        </div>
-      </div>`;
-    }).join('');
+  document.getElementById("st").textContent   = items.length;
+  document.getElementById("sok").textContent  = items.filter(function(i) { return !!window.counts[i.id]; }).length;
+  document.getElementById("sdif").textContent = items.filter(function(i) {
+    return window.counts[i.id] && window.counts[i.id].count !== i.sap;
+  }).length;
+
+  if (tab === "dif") {
+    if (!items.length) {
+      document.getElementById("list").innerHTML = '<div class="empty">Sin diferencias aún.<br>Aparecerán aquí en tiempo real.</div>';
+      return;
+    }
+    document.getElementById("list").innerHTML = items.map(function(item) {
+      var c = window.counts[item.id];
+      var d = c.count - item.sap;
+      var s = sev(d);
+      var col = BAR_COL[s];
+      var sign = d > 0 ? "+" : "";
+      return '<div class="drow">' +
+        '<div class="dbar ' + BAR_CLS[s] + '"></div>' +
+        '<div class="dcont" onclick="openModal(\'' + item.id + '\')">' +
+          '<div class="il">' +
+            '<div class="iname">' + item.n + '</div>' +
+            '<div class="isub">SAP: ' + item.sap + ' · Real: ' + c.count + ' · ' + item.t + (c.lote ? ' · L:' + c.lote : '') + '</div>' +
+            (c.obs ? '<div class="isub" style="color:#888;margin-top:1px">' + c.obs + '</div>' : '') +
+          '</div>' +
+          '<div class="dbadge" style="background:' + col + '22;color:' + col + '">' + sign + d + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join("");
     return;
   }
 
-  document.getElementById('list').innerHTML=items.map(item=>{
-    const b=badge(item);
-    const c=counts[item.id];
-    return`<div class="item" onclick="openModal('${item.id}')">
-      <div class="il">
-        <div class="iname">${item.n}</div>
-        <div class="isub">Cód: ${item.id} · SAP: ${item.sap}${c&&c.lote?' · L:'+c.lote:''}</div>
-      </div>
-      <span class="badge ${b.cls}">${b.txt}</span>
-    </div>`;
-  }).join('')||'<div class="empty">Sin resultados</div>';
+  document.getElementById("list").innerHTML = items.map(function(item) {
+    var b = getBadge(item);
+    var c = window.counts[item.id];
+    return '<div class="item" onclick="openModal(\'' + item.id + '\')">' +
+      '<div class="il">' +
+        '<div class="iname">' + item.n + '</div>' +
+        '<div class="isub">Cód: ' + item.id + ' · SAP: ' + item.sap + (c && c.lote ? ' · L:' + c.lote : '') + '</div>' +
+      '</div>' +
+      '<span class="badge ' + b.cls + '">' + b.txt + '</span>' +
+    '</div>';
+  }).join("") || '<div class="empty">Sin resultados</div>';
 }
 
-function sw(t){
-  tab=t;
-  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',['med','ins','dif'][i]===t));
-  document.getElementById('search').value='';
-  render();
+// ── modal ─────────────────────────────────────────────────
+function openModal(id) {
+  var item = ALL.find(function(i) { return i.id === id; });
+  if (!item) return;
+  _openId = id;
+  var c = window.counts[id];
+  document.getElementById("mtitle").textContent = item.n;
+  document.getElementById("mcode").textContent  = "Código: " + id + " · " + item.t;
+  document.getElementById("mref").textContent   = item.sap + " unidades en SAP";
+  document.getElementById("mlotes").textContent = item.lotes ? "Lotes SAP: " + item.lotes : "";
+  document.getElementById("mcnt").value  = c ? c.count : item.sap;
+  document.getElementById("mlote").value = c && c.lote ? c.lote : (item.lotes && !item.lotes.includes("/") ? item.lotes : "");
+  document.getElementById("lhint").textContent  = item.lotes && item.lotes.includes("/") ? "Múltiples lotes: " + item.lotes : "";
+  document.getElementById("mvenc").value = c && c.venc ? c.venc : "";
+  document.getElementById("mobs").value  = c && c.obs  ? c.obs  : "";
+  document.getElementById("mbg").classList.add("open");
 }
 
-// ── MODAL ─────────────────────────────────────────────────
-function openModal(id){
-  const item=ALL.find(i=>i.id===id);if(!item)return;
-  active=item;
-  const c=counts[id];
-  document.getElementById('mtitle').textContent=item.n;
-  document.getElementById('mcode').textContent='Código: '+id+' · '+item.t;
-  document.getElementById('mref').textContent=item.sap+' unidades en SAP';
-  document.getElementById('mlotes').textContent=item.lotes?'Lotes SAP: '+item.lotes:'';
-  document.getElementById("mcnt").value=c?c.count:item.sap;
-  document.getElementById('mlote').value=c&&c.lote?c.lote:(item.lotes&&item.lotes.indexOf('/')<0?item.lotes:'');
-  document.getElementById('lotehint').textContent=item.lotes&&item.lotes.indexOf('/')>-1?'Múltiples lotes: '+item.lotes:'';
-  document.getElementById('mvenc').value=c&&c.venc?c.venc:'';
-  document.getElementById('mobs').value=c&&c.obs?c.obs:'';
-  document.getElementById('modal').classList.add('open');
+function closeModal() {
+  document.getElementById("mbg").classList.remove("open");
+  _openId = null;
 }
-function closeModal(){document.getElementById('modal').classList.remove('open');active=null;}
-function chg(d){const el=document.getElementById('mcnt');el.value=Math.max(0,parseInt(el.value||0)+d);}
-async function save(){
-  if(!active)return;
-  const itemId = active.id; // capture before closeModal clears active
-  const val={
-    count: parseInt(document.getElementById("mcnt").value)||0,
-    lote: document.getElementById('mlote').value.trim(),
-    venc: document.getElementById('mvenc').value.trim(),
-    obs:  document.getElementById('mobs').value.trim(),
-    ts:   new Date().toISOString()
-  };
+
+function bgClick(e) {
+  if (e.target === document.getElementById("mbg")) closeModal();
+}
+
+function chg(d) {
+  var el  = document.getElementById("mcnt");
+  var cur = parseInt(el.value) || 0;
+  el.value = Math.max(0, cur + d);
+}
+
+// ── SAVE — the only function that matters ─────────────────
+function saveItem() {
+  // Capture everything BEFORE touching the DOM
+  var id    = _openId;
+  var count = parseInt(document.getElementById("mcnt").value) || 0;
+  var lote  = document.getElementById("mlote").value.trim();
+  var venc  = document.getElementById("mvenc").value.trim();
+  var obs   = document.getElementById("mobs").value.trim();
+
+  if (!id) return; // nothing open
+
+  var val = { count: count, lote: lote, venc: venc, obs: obs, ts: new Date().toISOString() };
+
+  // 1. Save locally immediately
+  window.counts[id] = val;
+  window._saving[id] = true;
+
+  // 2. Close modal & refresh UI
   closeModal();
-  render();
-  await window.fbSave(itemId, val);
-}
-document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal();});
+  renderList();
 
-// ── EXPORT ────────────────────────────────────────────────
-function exportXLS(){
-  const rows=items=>items.map(item=>{
-    const c=counts[item.id];
-    const contado=c!==undefined?c.count:'';
-    const diff=c!==undefined?c.count-item.sap:'';
-    const s=diff!==''?sev(diff):'';
-    return{'Código':item.id,'Descripción':item.n,'Tipo':item.t,'Stock SAP':item.sap,'Conteo real':contado,'Diferencia':diff,'Criticidad':s!==''?SEV_LBL[s]:'','Lote/Serie':c&&c.lote?c.lote:'','Vencimiento':c&&c.venc?c.venc:'','Observación':c&&c.obs?c.obs:'','Estado':c===undefined?'Pendiente':diff===0?'OK':diff>0?'Sobrante':'Faltante'};
-  });
-  const cols=[{wch:10},{wch:44},{wch:12},{wch:12},{wch:12},{wch:12},{wch:12},{wch:20},{wch:14},{wch:32},{wch:10}];
-  const wb=XLSX.utils.book_new();
-  const wm=XLSX.utils.json_to_sheet(rows(MED));wm['!cols']=cols;XLSX.utils.book_append_sheet(wb,wm,'Medicamentos');
-  const wi=XLSX.utils.json_to_sheet(rows(INS));wi['!cols']=cols;XLSX.utils.book_append_sheet(wb,wi,'Insumos');
-  const diffs=ALL.filter(i=>counts[i.id]&&counts[i.id].count!==i.sap).sort((a,b)=>Math.abs(counts[b.id].count-b.sap)-Math.abs(counts[a.id].count-a.sap));
-  const wd=XLSX.utils.json_to_sheet(rows(diffs));wd['!cols']=cols;XLSX.utils.book_append_sheet(wb,wd,'Solo diferencias');
-  XLSX.writeFile(wb,'Inventario_ACHS_Laja_Mayo_2026.xlsx');
+  // 3. Write to Firebase (async, non-blocking)
+  if (typeof window._fbWrite === "function") {
+    window._fbWrite(id, val)
+      .then(function()  { delete window._saving[id]; setSyncUI(true); })
+      .catch(function() { delete window._saving[id]; setSyncUI(false); });
+  } else {
+    // SDK not loaded yet, retry once after 1s
+    setTimeout(function() {
+      if (typeof window._fbWrite === "function") {
+        window._fbWrite(id, val)
+          .then(function()  { delete window._saving[id]; setSyncUI(true); })
+          .catch(function() { delete window._saving[id]; setSyncUI(false); });
+      }
+    }, 1000);
+  }
 }
-render();
+
+// ── export ────────────────────────────────────────────────
+function exportXLS() {
+  var cols = [{wch:10},{wch:44},{wch:12},{wch:12},{wch:12},{wch:12},{wch:12},{wch:20},{wch:14},{wch:32},{wch:10}];
+  function rows(items) {
+    return items.map(function(item) {
+      var c    = window.counts[item.id];
+      var cont = c !== undefined ? c.count : "";
+      var diff = c !== undefined ? c.count - item.sap : "";
+      var s    = diff !== "" ? sev(diff) : "";
+      return {
+        "Código": item.id, "Descripción": item.n, "Tipo": item.t,
+        "Stock SAP": item.sap, "Conteo real": cont, "Diferencia": diff,
+        "Criticidad": s !== "" ? SEV_LBL[s] : "",
+        "Lote/Serie": c && c.lote ? c.lote : "",
+        "Vencimiento": c && c.venc ? c.venc : "",
+        "Observación": c && c.obs  ? c.obs  : "",
+        "Estado": c === undefined ? "Pendiente" : diff === 0 ? "OK" : diff > 0 ? "Sobrante" : "Faltante"
+      };
+    });
+  }
+  var wb = XLSX.utils.book_new();
+  var wm = XLSX.utils.json_to_sheet(rows(MED)); wm["!cols"] = cols; XLSX.utils.book_append_sheet(wb, wm, "Medicamentos");
+  var wi = XLSX.utils.json_to_sheet(rows(INS)); wi["!cols"] = cols; XLSX.utils.book_append_sheet(wb, wi, "Insumos");
+  var dd = ALL.filter(function(i) { return window.counts[i.id] && window.counts[i.id].count !== i.sap; });
+  dd.sort(function(a,b){ return Math.abs(window.counts[b.id].count-b.sap)-Math.abs(window.counts[a.id].count-a.sap); });
+  var wd = XLSX.utils.json_to_sheet(rows(dd)); wd["!cols"] = cols; XLSX.utils.book_append_sheet(wb, wd, "Solo diferencias");
+  XLSX.writeFile(wb, "Inventario_ACHS_Laja_Mayo_2026.xlsx");
+}
+
+// init
+renderList();
 </script>
 </body>
 </html>
